@@ -271,3 +271,4 @@ enum RoiVisualKind {
         RoiVisualKind.unknown => 'unknown',
       };
 }
+

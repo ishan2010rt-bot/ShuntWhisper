@@ -61,3 +61,4 @@ class Failure extends Equatable {
   @override
   String toString() => 'Failure(code: $code, message: $message)';
 }
+

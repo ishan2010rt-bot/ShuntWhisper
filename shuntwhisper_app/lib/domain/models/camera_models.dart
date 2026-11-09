@@ -418,3 +418,4 @@ class CameraCapabilities extends Equatable {
         physicalCameraIds,
       ];
 }
+

@@ -133,3 +133,4 @@ class PatchLayout extends Equatable {
         fiducials,
       ];
 }
+

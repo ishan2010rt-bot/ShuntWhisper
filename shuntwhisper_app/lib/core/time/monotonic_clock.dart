@@ -42,3 +42,4 @@ class FakeMonotonicClock implements MonotonicClock {
   @override
   int nowNanos() => _currentNanos;
 }
+
