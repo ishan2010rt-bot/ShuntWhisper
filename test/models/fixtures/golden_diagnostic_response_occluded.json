@@ -1,0 +1,63 @@
+{
+  "sessionId": "golden-session-occluded",
+  "engineVersion": "1.2.0",
+  "calibrationIdUsed": "CAL-TLC-2025-01",
+  "processedAtUtc": "2026-11-09T04:05:16.473391Z",
+  "classification": "OCCLUDED",
+  "inconclusiveReason": null,
+  "inconclusiveReasonRaw": null,
+  "deltaTUdC": {
+    "value": -0.012,
+    "sigma": 0.033,
+    "ci95Lo": -0.077,
+    "ci95Hi": 0.053
+  },
+  "deltaTEvapC": {
+    "value": 2.35,
+    "sigma": 0.05,
+    "isLowerBound": false,
+    "definition": "T_lateral_ref - 0.5*(T_up + T_down)"
+  },
+  "estimatedFlowMlMin": {
+    "point": 0.0,
+    "lo": 0.0,
+    "hi": 0.04,
+    "method": "symmetric_thermal_signature",
+    "validated": false,
+    "is_experimental": true
+  },
+  "confidencePct": 95.9,
+  "confidenceFactors": {
+    "registration": 0.98,
+    "sharpness": 0.96,
+    "color_fit": 0.94,
+    "exposure": 0.98
+  },
+  "snrResolutionDb": 9.6,
+  "temperatures": {
+    "upstreamC": {
+      "value": 27.28,
+      "sigma": 0.02,
+      "ci95Lo": null,
+      "ci95Hi": null
+    },
+    "downstreamC": {
+      "value": 27.29,
+      "sigma": 0.02,
+      "ci95Lo": null,
+      "ci95Hi": null
+    },
+    "lateralRefC": {
+      "value": 29.63,
+      "sigma": 0.03,
+      "ci95Lo": null,
+      "ci95Hi": null
+    }
+  },
+  "timepoints": [],
+  "flags": [
+    "SYMMETRIC_PROFILE"
+  ],
+  "roiVisuals": [],
+  "retestAdvice": null
+}

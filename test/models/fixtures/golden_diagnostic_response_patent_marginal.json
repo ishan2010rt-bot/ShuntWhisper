@@ -1,0 +1,64 @@
+{
+  "sessionId": "golden-session-patent-marginal",
+  "engineVersion": "1.2.0",
+  "calibrationIdUsed": "CAL-TLC-2025-01",
+  "processedAtUtc": "2026-11-09T04:05:16.473216Z",
+  "classification": "PATENT_MARGINAL",
+  "inconclusiveReason": null,
+  "inconclusiveReasonRaw": null,
+  "deltaTUdC": {
+    "value": 0.185,
+    "sigma": 0.033,
+    "ci95Lo": 0.12,
+    "ci95Hi": 0.25
+  },
+  "deltaTEvapC": {
+    "value": 2.15,
+    "sigma": 0.05,
+    "isLowerBound": false,
+    "definition": "T_lateral_ref - 0.5*(T_up + T_down)"
+  },
+  "estimatedFlowMlMin": {
+    "point": 0.18,
+    "lo": 0.1,
+    "hi": 0.26,
+    "method": "empirical_characteristic_inversion",
+    "validated": false,
+    "is_experimental": true
+  },
+  "confidencePct": 88.5,
+  "confidenceFactors": {
+    "registration": 0.95,
+    "sharpness": 0.92,
+    "color_fit": 0.89,
+    "exposure": 0.95
+  },
+  "snrResolutionDb": 9.6,
+  "temperatures": {
+    "upstreamC": {
+      "value": 27.35,
+      "sigma": 0.02,
+      "ci95Lo": null,
+      "ci95Hi": null
+    },
+    "downstreamC": {
+      "value": 27.16,
+      "sigma": 0.02,
+      "ci95Lo": null,
+      "ci95Hi": null
+    },
+    "lateralRefC": {
+      "value": 29.4,
+      "sigma": 0.03,
+      "ci95Lo": null,
+      "ci95Hi": null
+    }
+  },
+  "timepoints": [],
+  "flags": [
+    "ASYMMETRIC_PROFILE",
+    "NEAR_DECISION_BOUNDARY"
+  ],
+  "roiVisuals": [],
+  "retestAdvice": null
+}

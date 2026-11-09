@@ -117,9 +117,9 @@ class PatchGeometry:
     )  # id -> centre; order TL, TR, BR, BL
     axis_y: float = 200.0
     foam_cx: float = 400.0
-    x0: float = 130.0  # ROI offset from the foam centre along the flow axis
-    foam_rect: Tuple[int, int, int, int] = (350, 150, 450, 250)  # x0,y0,x1,y1
-    tlc_rect: Tuple[int, int, int, int] = (100, 110, 700, 340)
+    x0: float = 87.0  # ROI offset from foam centre along flow axis: 8.7 mm * 10 px/mm
+    foam_rect: Tuple[int, int, int, int] = (362, 162, 438, 238)  # 7.6 x 7.6 mm bare aperture
+    tlc_rect: Tuple[int, int, int, int] = (100, 110, 700, 360)
     swatches: Dict[str, Tuple[int, int, int, int]] = field(
         default_factory=lambda: {
             "white": (170, 25, 270, 85),
@@ -135,8 +135,8 @@ class PatchGeometry:
         (350, 358, 450, 392),
         (570, 358, 670, 392),
     )
-    roi_w: float = 48.0
-    roi_h: float = 36.0
+    roi_w: float = 40.0  # 4.0 mm along flow axis
+    roi_h: float = 60.0  # 6.0 mm transverse width
 
     @property
     def rois(self) -> Dict[str, Roi]:
@@ -144,8 +144,9 @@ class PatchGeometry:
         return {
             "upstream": Roi("upstream", c - self.x0, y, self.roi_w, self.roi_h),
             "downstream": Roi("downstream", c + self.x0, y, self.roi_w, self.roi_h),
-            "evap_center": Roi("evap_center", c, 268.0, 80.0, 24.0),  # flanking, just below the foam
-            "substrate_ref": Roi("substrate_ref", 140.0, 268.0, 40.0, 24.0),  # far from sink
+            "lateral_ref": Roi("lateral_ref", c, y + 120.0, self.roi_w, self.roi_h),
+            "substrate_ref": Roi("substrate_ref", c, y + 120.0, self.roi_w, self.roi_h),
+            "evap_center": Roi("evap_center", c, y + 68.0, 80.0, 24.0),
         }
 
     def marker_corners(self, mid: int) -> np.ndarray:
@@ -193,7 +194,7 @@ class EngineConfig:
     nominal_distance_mm: float = 100.0
     sigma_angle_frac: float = 0.25  # 1-sigma uncertainty as a fraction of the applied correction (intrinsics, kappa)
     # --- hydration ---
-    min_sink_drop_c: float = 2.0
+    min_sink_drop_c: float = 1.50
     # --- QC gates ---
     max_reg_rms_px: float = 3.0
     min_sharpness: float = 0.06  # normalised Laplacian variance (sharp synthetic ~0.4; sigma_blur 2.5px ~0.05)
@@ -671,15 +672,15 @@ def resolve_dark_side(rois: Dict[str, RoiStats]) -> None:
     Evaporation can only COOL, so a dark ROI that is *colder than an in-band substrate reference*
     is below band; if the substrate itself is dark/warm the whole patch is warm.  Mutates in place.
     """
-    ref = rois.get("substrate_ref")
+    ref = rois.get("lateral_ref") or rois.get("substrate_ref")
     for r in rois.values():
         if r.state is not RoiState.DARK_AMBIGUOUS:
             continue
         if ref is None or ref.state in WARM_STATES | {RoiState.DARK_AMBIGUOUS, RoiState.INVALID}:
             r.state = RoiState.DARK_WARM
-        elif ref.state is RoiState.IN_BAND and r.name != "substrate_ref":
+        elif ref.state is RoiState.IN_BAND and r.name not in ("substrate_ref", "lateral_ref"):
             r.state = RoiState.DARK_COLD
-        elif ref.state in COLD_STATES:
+        elif ref.state in COLD_STATES or ref.state is RoiState.PARTIAL_DARK:
             r.state = RoiState.DARK_COLD
 
 
@@ -742,6 +743,8 @@ class FrameAnalysis:
     snr_resolution_db: float = float("nan")  # 20log10(eps / sigma): can we resolve the 0.1 degC decision line?
     sink_drop_c: float = float("nan")
     sink_drop_is_lower_bound: bool = False
+    delta_t_evap_c: float = float("nan")
+    delta_t_evap_definition: str = "T_lateral_ref - 0.5*(T_up + T_down)"
     angle_corr_c: Dict[str, float] = field(default_factory=dict)  # degC subtracted per ROI (Bragg cos-theta)
     pose: Dict[str, float] = field(default_factory=dict)  # distance_mm, tilt_deg
     status: FlowStatus = FlowStatus.INDETERMINATE
@@ -867,7 +870,8 @@ class ShuntWhisperEngine:
     def _infer(self, fa: FrameAnalysis, baseline: Optional[FrameAnalysis]) -> None:
         cfg = self.cfg
         up, dn = fa.rois["upstream"], fa.rois["downstream"]
-        ev, sub = fa.rois["evap_center"], fa.rois["substrate_ref"]
+        ev = fa.rois.get("evap_center")
+        sub = fa.rois.get("lateral_ref") or fa.rois["substrate_ref"]
 
         # 1) hard QC gate -- no physiological verdict from a bad frame
         if fa.qa.failures:
@@ -877,15 +881,16 @@ class ShuntWhisperEngine:
 
         # 2) hydration / sink gate.  An un-cooled patch is symmetric and would be mislabelled as
         #    OCCLUSION -- the most dangerous false call, so it is gated BEFORE flow classification.
-        ok_sink, drop, is_lb, why = self._sink_check(ev, sub)
+        ok_sink, drop, is_lb, why = self._sink_check(ev, sub, up, dn)
         fa.sink_drop_c, fa.sink_drop_is_lower_bound = drop, is_lb
+        fa.delta_t_evap_c = drop
         if why:
             fa.flags.append(why)
         if ok_sink is False:
             fa.status, fa.reason = FlowStatus.INDETERMINATE, "INSUFFICIENT_HYDRATION"
             return
         if ok_sink is None:
-            fa.status, fa.reason = FlowStatus.INDETERMINATE, "SINK_UNVERIFIABLE"
+            fa.status, fa.reason = FlowStatus.INDETERMINATE, ("OUT_OF_RANGE_COLD" if why == "SUBSTRATE_BELOW_BAND" else "SINK_UNVERIFIABLE")
             return
 
         # 3) in-band requirement for the two flow ROIs
@@ -929,21 +934,27 @@ class ShuntWhisperEngine:
             fa.flags.append("SPECULAR_NEAR_ROI")  # un-clipped highlight skirt may bias hue
         fa.confidence, fa.confidence_factors = self._confidence(fa, baseline)
 
-    def _sink_check(self, ev: RoiStats, sub: RoiStats) -> Tuple[Optional[bool], float, bool, str]:
+    def _sink_check(self, ev: Optional[RoiStats], sub: RoiStats,
+                    up: Optional[RoiStats] = None, dn: Optional[RoiStats] = None) -> Tuple[Optional[bool], float, bool, str]:
         """Returns (adequate?, drop, drop_is_lower_bound, flag). adequate=None -> cannot verify."""
         cfg, cal = self.cfg, self.cal
         thr = cfg.min_sink_drop_c
-        if sub.state in COLD_STATES:  # whole patch below band: environment too cold
+        if sub.state in COLD_STATES or (sub.state is RoiState.PARTIAL_DARK and (math.isnan(sub.temp_c) or sub.temp_c <= cal.t_min + 0.8)):
             return None, float("nan"), False, "SUBSTRATE_BELOW_BAND"
-        if ev.state in COLD_STATES:  # sink centre colder than band edge -> strong sink
+        # 1) Primary definition per locked spec: ΔT_evap = T_lateral_ref - 0.5 * (T_up + T_down)
+        if sub.exact and up and dn and up.exact and dn.exact:
+            d = float(sub.temp_c - 0.5 * (up.temp_c + dn.temp_c))
+            return d >= thr, d, False, ""
+        # 2) Fallback to central/flanking TLC if available
+        if ev and ev.state in COLD_STATES:  # sink centre colder than band edge -> strong sink
             return True, float("nan"), False, ""
-        if ev.exact and sub.exact:
+        if ev and ev.exact and sub.exact:
             d = sub.temp_c - ev.temp_c
             return d >= thr, d, False, ""
-        if ev.exact and sub.state in WARM_STATES:  # substrate censored: drop >= T_max - T_ev
+        if ev and ev.exact and sub.state in WARM_STATES:  # substrate censored: drop >= T_max - T_ev
             d = cal.t_max - ev.temp_c
             return (True if d >= thr else False), d, True, ""
-        if ev.state in WARM_STATES | {RoiState.DARK_AMBIGUOUS}:
+        if (ev and ev.state in WARM_STATES | {RoiState.DARK_AMBIGUOUS}) or (up and up.state in WARM_STATES and dn and dn.state in WARM_STATES):
             return False, 0.0, False, ""
         return None, float("nan"), False, "SINK_ROI_UNUSABLE"
 
@@ -1414,14 +1425,14 @@ def render_frame(geom: PatchGeometry, sc: SynthScenario, t: float, cal: HueTempC
 SCENARIOS: Dict[str, SynthScenario] = {
     "occluded": SynthScenario("occluded", flow_ml_min=0.0),
     "low_flow": SynthScenario("low_flow", flow_ml_min=0.10),
-    "normal_flow": SynthScenario("normal_flow", flow_ml_min=0.30),
-    "tungsten_normal": SynthScenario("tungsten_normal", flow_ml_min=0.30, illum_rgb=(1.35, 1.0, 0.62),
+    "normal_flow": SynthScenario("normal_flow", flow_ml_min=0.45),
+    "tungsten_normal": SynthScenario("tungsten_normal", flow_ml_min=0.45, illum_rgb=(1.35, 1.0, 0.62),
                                      illum_grad=(0.12, -0.06)),
-    "specular_normal": SynthScenario("specular_normal", flow_ml_min=0.30,
+    "specular_normal": SynthScenario("specular_normal", flow_ml_min=0.45,
                                      specular=((230.0, 195.0, 18.0, 3.0), (556.0, 208.0, 10.0, 3.0))),
     "dry_foam": SynthScenario("dry_foam", flow_ml_min=0.0, sink_amp_ss=0.8, sink_amp_pk=0.9),
-    "too_cold": SynthScenario("too_cold", flow_ml_min=0.3, t0_c=27.0),
-    "blurred": SynthScenario("blurred", flow_ml_min=0.3, blur_sigma=2.8),
+    "too_cold": SynthScenario("too_cold", flow_ml_min=0.45, t0_c=27.0),
+    "blurred": SynthScenario("blurred", flow_ml_min=0.45, blur_sigma=2.8),
     "off_center_low": SynthScenario("off_center_low", flow_ml_min=0.10, offset_mm=(7.0, 2.0), pose=(3.0, -4.0, 3.0)),
 }
 

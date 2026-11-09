@@ -1,0 +1,110 @@
+{
+  "sessionPolicy": {
+    "targetDistanceMm": 100.0,
+    "alignStableFrames": 8,
+    "alignStableMs": 800,
+    "alignTimeoutS": 120,
+    "baselineCaptureBurst": 3,
+    "baselineStaleS": 180,
+    "doseVolumeUlMin": 60.0,
+    "doseVolumeUlMax": 80.0,
+    "doseVolumeUlNominal": 70.0,
+    "tTransientS": 23.0,
+    "tSteadyS": 120.0,
+    "windowHalfWidthS": 1.0,
+    "torchPolicy": "windowed",
+    "torchPreRollMs": 2500,
+    "minBatteryPct": 20,
+    "minFreeMb": 500,
+    "ambientHardRangeC": [
+      10.0,
+      35.0
+    ],
+    "ambientWarnRangeC": [
+      15.0,
+      30.0
+    ]
+  },
+  "alignmentThresholds": {
+    "maxPitchDeg": 5.0,
+    "maxYawDeg": 5.0,
+    "maxRollDeg": 8.0,
+    "maxCenterOffsetFrac": 0.05,
+    "maxLateralOffsetMm": 2.0,
+    "distanceTolFrac": 0.1,
+    "minFrameMarginFrac": 0.04
+  },
+  "validatorThresholds": {
+    "minSharpness": 0.06,
+    "maxWhiteClipFrac": 0.02,
+    "maxColorFitRms": 0.06,
+    "maxRegRmsPx": 3.0
+  },
+  "patchLayout": {
+    "upstreamCenterMm": {
+      "x": -8.7,
+      "y": 0.0
+    },
+    "downstreamCenterMm": {
+      "x": 8.7,
+      "y": 0.0
+    },
+    "lateralRefCenterMm": {
+      "x": 0.0,
+      "y": 12.0
+    },
+    "apertureCenterMm": {
+      "x": 0.0,
+      "y": 0.0
+    },
+    "apertureSizeMm": {
+      "w": 7.6,
+      "h": 7.6
+    },
+    "roiSizeMm": {
+      "w": 4.0,
+      "h": 6.0
+    },
+    "fiducials": [
+      {
+        "id": 0,
+        "centerMm": {
+          "x": -18.0,
+          "y": -18.0
+        },
+        "sideMm": 6.0
+      },
+      {
+        "id": 1,
+        "centerMm": {
+          "x": 18.0,
+          "y": -18.0
+        },
+        "sideMm": 6.0
+      },
+      {
+        "id": 2,
+        "centerMm": {
+          "x": 18.0,
+          "y": 18.0
+        },
+        "sideMm": 6.0
+      },
+      {
+        "id": 3,
+        "centerMm": {
+          "x": -18.0,
+          "y": 18.0
+        },
+        "sideMm": 6.0
+      }
+    ]
+  },
+  "featureFlags": {
+    "showFlowEstimate": false,
+    "windowedTorch": true,
+    "enableAutoWetDetection": false,
+    "exportDiagnosticPdf": true
+  },
+  "deviceProfileVersion": 1
+}

@@ -1,0 +1,99 @@
+{
+  "sessionId": "golden-session-patent-high",
+  "engineVersion": "1.2.0",
+  "calibrationIdUsed": "CAL-TLC-2025-01",
+  "processedAtUtc": "2026-11-09T04:05:16.472093Z",
+  "classification": "PATENT_HIGH",
+  "inconclusiveReason": null,
+  "inconclusiveReasonRaw": null,
+  "deltaTUdC": {
+    "value": 0.452,
+    "sigma": 0.032,
+    "ci95Lo": 0.389,
+    "ci95Hi": 0.515
+  },
+  "deltaTEvapC": {
+    "value": 2.41,
+    "sigma": 0.05,
+    "isLowerBound": false,
+    "definition": "T_lateral_ref - 0.5*(T_up + T_down)"
+  },
+  "estimatedFlowMlMin": {
+    "point": 0.45,
+    "lo": 0.37,
+    "hi": 0.53,
+    "method": "empirical_characteristic_inversion",
+    "validated": false,
+    "is_experimental": true
+  },
+  "confidencePct": 96.0,
+  "confidenceFactors": {
+    "registration": 0.98,
+    "sharpness": 0.95,
+    "color_fit": 0.92,
+    "exposure": 0.99
+  },
+  "snrResolutionDb": 9.9,
+  "temperatures": {
+    "upstreamC": {
+      "value": 27.48,
+      "sigma": 0.02,
+      "ci95Lo": null,
+      "ci95Hi": null
+    },
+    "downstreamC": {
+      "value": 27.03,
+      "sigma": 0.02,
+      "ci95Lo": null,
+      "ci95Hi": null
+    },
+    "lateralRefC": {
+      "value": 29.66,
+      "sigma": 0.03,
+      "ci95Lo": null,
+      "ci95Hi": null
+    }
+  },
+  "timepoints": [
+    {
+      "tNominalS": 23.0,
+      "classification": "PATENT_HIGH",
+      "deltaTUdC": {
+        "value": 0.38,
+        "sigma": 0.04,
+        "ci95Lo": null,
+        "ci95Hi": null
+      },
+      "confidencePct": 91.0,
+      "qaPassed": true,
+      "qaFailures": []
+    },
+    {
+      "tNominalS": 120.0,
+      "classification": "PATENT_HIGH",
+      "deltaTUdC": {
+        "value": 0.452,
+        "sigma": 0.032,
+        "ci95Lo": null,
+        "ci95Hi": null
+      },
+      "confidencePct": 96.0,
+      "qaPassed": true,
+      "qaFailures": []
+    }
+  ],
+  "flags": [
+    "ASYMMETRIC_PROFILE"
+  ],
+  "roiVisuals": [
+    {
+      "name": "overlay",
+      "kind": "overlay",
+      "url": "http://127.0.0.1:8000/v1/sessions/golden-session-patent-high/rois/overlay",
+      "expiresAtUtc": "2026-11-09T10:00:00Z",
+      "widthPx": 800,
+      "heightPx": 400
+    }
+  ],
+  "retestAdvice": null
+}

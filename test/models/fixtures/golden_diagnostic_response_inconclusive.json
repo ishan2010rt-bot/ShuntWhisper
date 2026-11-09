@@ -1,0 +1,34 @@
+{
+  "sessionId": "golden-session-inconclusive-hydration",
+  "engineVersion": "1.2.0",
+  "calibrationIdUsed": "CAL-TLC-2025-01",
+  "processedAtUtc": "2026-11-09T04:05:16.473538Z",
+  "classification": "INCONCLUSIVE",
+  "inconclusiveReason": "INSUFFICIENT_HYDRATION",
+  "inconclusiveReasonRaw": "INSUFFICIENT_HYDRATION",
+  "deltaTUdC": null,
+  "deltaTEvapC": {
+    "value": 0.45,
+    "sigma": 0.05,
+    "isLowerBound": false,
+    "definition": "T_lateral_ref - 0.5*(T_up + T_down)"
+  },
+  "estimatedFlowMlMin": null,
+  "confidencePct": 0.0,
+  "confidenceFactors": {},
+  "snrResolutionDb": null,
+  "temperatures": {
+    "upstreamC": null,
+    "downstreamC": null,
+    "lateralRefC": null
+  },
+  "timepoints": [],
+  "flags": [
+    "INSUFFICIENT_HYDRATION"
+  ],
+  "roiVisuals": [],
+  "retestAdvice": {
+    "code": "INSUFFICIENT_HYDRATION",
+    "requiresNewPatch": true
+  }
+}

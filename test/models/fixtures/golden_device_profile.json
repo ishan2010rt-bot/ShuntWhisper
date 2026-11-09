@@ -1,0 +1,34 @@
+{
+  "platform": "android",
+  "model": "pixel_8",
+  "cameraId": "0",
+  "previewAnalysisSize": {
+    "widthPx": 1280,
+    "heightPx": 960
+  },
+  "stillSize": {
+    "widthPx": 4080,
+    "heightPx": 3072
+  },
+  "targetDistanceMm": 100.0,
+  "androidFocusDiopters": 10.0,
+  "iosLensPosition": null,
+  "neutralWbGains": {
+    "r": 1.95,
+    "gEven": 1.0,
+    "gOdd": 1.0,
+    "b": 1.82
+  },
+  "intrinsicsByStill": [
+    {
+      "fx": 3120.0,
+      "fy": 3120.0,
+      "cx": 2040.0,
+      "cy": 1536.0,
+      "imageW": 4080,
+      "imageH": 3072,
+      "source": "profile"
+    }
+  ],
+  "version": 1
+}
